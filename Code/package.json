@@ -1,6 +1,6 @@
 {
-  "name": "toggle-check-box",
-	"displayName": "Toggle Check Box",
+  "name": "check-box-switcher",
+	"displayName": "check-box-switcher",
 	"description": "",
 	"version": "0.0.1",
 	"engines": {
@@ -10,14 +10,14 @@
 		"Other"
 	],
 	"activationEvents": [
-        "onCommand:toggle-check-box.helloWorld"
+        "onCommand:check-box-switcher.toggle check box"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
 		"commands": [
 			{
-				"command": "toggle-check-box.helloWorld",
-				"title": "Hello World"
+				"command": "check-box-switcher.toggle check box",
+				"title": "Toggle Check Box"
 			}
 		]
 	},
