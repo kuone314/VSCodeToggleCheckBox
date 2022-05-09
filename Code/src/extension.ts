@@ -35,7 +35,7 @@ function serchClusterTerm(document: vscode.TextDocument, lineNo: number, serchDi
 		if (lineNo < 0 || document.lineCount <= lineNo) { return true; }
 		return document.lineAt(lineNo).isEmptyOrWhitespace;
 	}
-;
+		;
 	if (isEmptyLine(lineNo)) { return lineNo; }
 
 	const range = (serchDir === DIR.front)
@@ -152,36 +152,71 @@ function applyCheckBoxStatus(editBuilder: vscode.TextEditorEdit, document: vscod
 	}
 }
 
-function exec(editor: vscode.TextEditor, lineNo: number) {
+///////////////////////////////////////////////////////////////////////////////////////////////////
+function groupingLineNoAry(document: vscode.TextDocument, lineNoAry: Enumerable.Enumerable<number>) {
+	var result = new Array<[[number, number], number[]]>();
+
+	const includeInLastCluster = (lineNo: number) => {
+		if (result.length === 0) { return false; }
+
+		const lastCluster = result[result.length - 1][0];
+		return lastCluster[0] <= lineNo && lineNo <= lastCluster[1];
+	};
+
+	const normalizedLineNoAry = lineNoAry.Distinct().ToArray().sort();
+	for (const lineNo of normalizedLineNoAry) {
+		const checkType = getCheckType(document.lineAt(lineNo).text);
+		if (!checkType) { continue; }
+
+		if (includeInLastCluster(lineNo)) {
+			result[result.length - 1][1].push(lineNo);
+			continue;
+		}
+
+		result.push([getCluster(document, lineNo), [lineNo]]);
+	}
+	return result;
+}
+
+function exec(editor: vscode.TextEditor, lineNoAry: Enumerable.Enumerable<number>) {
 	const document = editor.document;
 
-	const type = getCheckType(document.lineAt(lineNo).text);
-	if (!type) { return; }
+	const groupAry = groupingLineNoAry(document, lineNoAry);
+	if (groupAry.length === 0) { return; }
 
-	const trgCluster = getCluster(document, lineNo);
-	const orgheckBoxStatus = getCheckBoxStatus(document, trgCluster);
+	for (const group of groupAry) {
+		const trgCluster = group[0];
+		const lineNoAry = group[1];
 
-	var newCheckBoxStatus = orgheckBoxStatus;
+		const orgheckBoxStatus = getCheckBoxStatus(document, trgCluster);
 
-	const newCheckType = (type === CHECK_TYPE.on) ? CHECK_TYPE.off : CHECK_TYPE.on;
-	newCheckBoxStatus.set(lineNo, newCheckType);
+		var newCheckBoxStatus = orgheckBoxStatus;
 
-	const childCheckBocLineNoAry = getChildCheckBox(document, lineNo);
-	for (const childCheckBocLineNo of childCheckBocLineNoAry) {
-		newCheckBoxStatus.set(childCheckBocLineNo, newCheckType);
+		for (const lineNo of lineNoAry) {
+			const orgCheckType = getCheckType(document.lineAt(lineNo).text);
+			if (!orgCheckType) { continue; }
+
+			const newCheckType = (orgCheckType === CHECK_TYPE.on) ? CHECK_TYPE.off : CHECK_TYPE.on;
+			newCheckBoxStatus.set(lineNo, newCheckType);
+
+			const childCheckBocLineNoAry = getChildCheckBox(document, lineNo);
+			for (const childCheckBocLineNo of childCheckBocLineNoAry) {
+				newCheckBoxStatus.set(childCheckBocLineNo, newCheckType);
+			}
+
+			let parentCheckBocLineNoAry = getParentCheckBox(document, lineNo);
+			parentCheckBocLineNoAry.sort();
+			parentCheckBocLineNoAry.reverse();
+			for (const parentCheckBocLineNo of parentCheckBocLineNoAry) {
+				const newCheckType = detectChackStateFromChild(document, newCheckBoxStatus, parentCheckBocLineNo);
+				newCheckBoxStatus.set(parentCheckBocLineNo, newCheckType);
+			}		
+		}
+
+		editor.edit(editBuilder => {
+			applyCheckBoxStatus(editBuilder, document, newCheckBoxStatus);
+		});
 	}
-
-	let parentCheckBocLineNoAry = getParentCheckBox(document, lineNo);
-	parentCheckBocLineNoAry.sort();
-	parentCheckBocLineNoAry.reverse();
-	for (const parentCheckBocLineNo of parentCheckBocLineNoAry) {
-		const newCheckType = detectChackStateFromChild(document, newCheckBoxStatus, parentCheckBocLineNo);
-		newCheckBoxStatus.set(parentCheckBocLineNo, newCheckType);
-	}
-
-	editor.edit(editBuilder => {
-		applyCheckBoxStatus(editBuilder, document, newCheckBoxStatus);
-	});
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -193,9 +228,10 @@ export function activate(context: vscode.ExtensionContext) {
 		const editor = vscode.window.activeTextEditor;
 		if (!editor) { return; }
 
-		// const selections = editor.selections;
-		const trgLineNo = editor.selection.active.line;
-		exec(editor, trgLineNo);
+		exec(
+			editor,
+			Enumerable.from(editor.selections).Select(selection => selection.active.line)
+		);
 	});
 
 	context.subscriptions.push(disposable);
