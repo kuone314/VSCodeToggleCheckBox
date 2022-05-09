@@ -52,7 +52,7 @@ function serchClusterTerm(document: vscode.TextDocument, lineNo: number, serchDi
 	return result;
 }
 
-function getCluster(document: vscode.TextDocument, lineNo: number): [number, number] {
+export function getCluster(document: vscode.TextDocument, lineNo: number): [number, number] {
 	return [
 		serchClusterTerm(document, lineNo, DIR.front),
 		serchClusterTerm(document, lineNo, DIR.back),
