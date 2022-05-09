@@ -1,4 +1,5 @@
 import * as vscode from "vscode";
+import * as Enumerable from "linq-es2015";
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 const CHECK_TYPE = {
@@ -24,32 +25,29 @@ function getCheckType(lineStr: string): CheckType | null {
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-function isEmptyLine(document: vscode.TextDocument, lineNo: Number): boolean {
-	return document.lineAt(lineNo.valueOf()).isEmptyOrWhitespace;
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////
 const DIR = {
 	front: -1,
 	back: +1,
 };
 type Dir = typeof DIR[keyof typeof DIR];
 function serchClusterTerm(document: vscode.TextDocument, lineNo: number, serchDir: Dir): number {
-	const validLineNo = (line: number) => {
-		return (serchDir === DIR.front)
-			? (line >= 0)
-			: (line < document.lineCount);
+	const isEmptyLine = (lineNo: number) => {
+		if (lineNo < 0 || document.lineCount <= lineNo) { return true; }
+		return document.lineAt(lineNo).isEmptyOrWhitespace;
+	}
+;
+	if (isEmptyLine(lineNo)) { return lineNo; }
+
+	const range = (serchDir === DIR.front)
+		? Enumerable.range(0, lineNo + 1).Reverse()
+		: Enumerable.range(lineNo, document.lineCount - lineNo + 1);
+
+	const clusterEnd = (lineNo: number) => {
+		const nextLineNo = lineNo + serchDir;
+		return isEmptyLine(nextLineNo);
 	};
 
-	var result = lineNo.valueOf();
-	if (isEmptyLine(document, result)) { return result; }
-	while (validLineNo(result)) {
-		const checkLineNo = result + serchDir;
-		if (!validLineNo(checkLineNo)) { return result; }
-		if (isEmptyLine(document, checkLineNo)) { return result; }
-		result = checkLineNo;
-	}
-	return result;
+	return range.First(clusterEnd);
 }
 
 export function getCluster(document: vscode.TextDocument, lineNo: number): [number, number] {
@@ -140,15 +138,15 @@ function detectChackStateFromChild(document: vscode.TextDocument, chackBoxState:
 	return result;
 }
 
-function applyCheckBoxStatus(editBuilder: vscode.TextEditorEdit,  document: vscode.TextDocument, checkBoxStatus: Map<number, CheckType>) {
-	for(var item of checkBoxStatus){
-		const lineNo=item[0];
-		const newCheckType=item[1];
+function applyCheckBoxStatus(editBuilder: vscode.TextEditorEdit, document: vscode.TextDocument, checkBoxStatus: Map<number, CheckType>) {
+	for (var item of checkBoxStatus) {
+		const lineNo = item[0];
+		const newCheckType = item[1];
 		const lineString = document.lineAt(lineNo).text;
-	
+
 		const curCheckType = getCheckType(lineString);
 		if (!curCheckType) { return; }
-		
+
 		const newLineStr = lineString.replace(checkBoxStr(curCheckType), checkBoxStr(newCheckType));
 		editBuilder.replace(document.lineAt(lineNo).range, newLineStr);
 	}
@@ -182,7 +180,7 @@ function exec(editor: vscode.TextEditor, lineNo: number) {
 	}
 
 	editor.edit(editBuilder => {
-		applyCheckBoxStatus(editBuilder,document, newCheckBoxStatus);
+		applyCheckBoxStatus(editBuilder, document, newCheckBoxStatus);
 	});
 }
 
