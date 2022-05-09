@@ -38,7 +38,7 @@ function serchClusterTerm(document: vscode.TextDocument, lineNo: number, serchDi
 	const validLineNo = (line: number) => {
 		return (serchDir === DIR.front)
 			? (line >= 0)
-			: (line <= document.lineCount);
+			: (line < document.lineCount);
 	};
 
 	var result = lineNo.valueOf();
@@ -52,7 +52,7 @@ function serchClusterTerm(document: vscode.TextDocument, lineNo: number, serchDi
 	return result;
 }
 
-function getCluster(document: vscode.TextDocument, lineNo: number): [number, number] {
+export function getCluster(document: vscode.TextDocument, lineNo: number): [number, number] {
 	return [
 		serchClusterTerm(document, lineNo, DIR.front),
 		serchClusterTerm(document, lineNo, DIR.back),
