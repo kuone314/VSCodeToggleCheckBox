@@ -58,7 +58,7 @@ export function getCluster(document: vscode.TextDocument, lineNo: number): [numb
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-function indentLevel(document: vscode.TextDocument, tabSize: number, lineNo: number): number {
+export function indentLevel(document: vscode.TextDocument, tabSize: number, lineNo: number): number {
 	const lineStr = document.lineAt(lineNo.valueOf()).text;
 	var result = 0;
 	for (const str of lineStr) {
