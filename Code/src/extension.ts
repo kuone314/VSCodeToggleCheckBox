@@ -62,9 +62,13 @@ export function indentLevel(document: vscode.TextDocument, tabSize: number, line
 	const lineStr = document.lineAt(lineNo.valueOf()).text;
 	var result = 0;
 	for (const str of lineStr) {
-		if (str === ' ') { result++; }
-		//TODO:É^ÉuÇÃçló∂
-		else { return result; }
+		if (str !== ' ' && str !== '\t') { return result; }
+
+		if (str === ' ') {
+			result++;
+		} else{
+			result = result - result % tabSize + tabSize;
+		}
 	}
 	return result;
 }
