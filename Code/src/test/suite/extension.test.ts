@@ -6,7 +6,7 @@ import * as vscode from 'vscode';
 // import * as myExtension from '../../extension';
 
 import path = require('node:path');
-import { getCluster } from '../../extension';
+import { getCluster, indentLevel } from '../../extension';
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 const testsRoot = path.resolve(__dirname, '../../../src/test/TestData');
@@ -60,11 +60,26 @@ async function testGetCluster(testDataPath: string) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
+async function testindentLevel() {
+	const document = await vscode.workspace.openTextDocument(testsRoot + `/IndentTest.md`);
+	const tabSize = 2;
+
+	for (const testLineNo of range(0, document.lineCount)) {
+		const answer = parseInt(document.lineAt(testLineNo).text);
+		const calced = indentLevel(document, tabSize, testLineNo);
+		assert.equal(answer, calced, "");
+	}
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
 suite('Extension Test Suite', () => {
-	test('selected class lines', async () => {
+	test('test get cluster', async () => {
 		await testGetCluster(testsRoot + `/TestData_1.md`);
 		await testGetCluster(testsRoot + `/TestData_2.md`);
 		await testGetCluster(testsRoot + `/TestData_3.md`);
 	});
 
+	test('test indent Level', async () => {
+		await testindentLevel();
+	});
 });
