@@ -77,6 +77,7 @@ suite('Extension Test Suite', () => {
 		await testGetCluster(testsRoot + `/TestData_1.md`);
 		await testGetCluster(testsRoot + `/TestData_2.md`);
 		await testGetCluster(testsRoot + `/TestData_3.md`);
+		await testGetCluster(testsRoot + `/TestData_4.md`);
 	});
 
 	test('test indent Level', async () => {
