@@ -1,2 +1,1 @@
-# VSCodeToggleCheckBox
-チェックボックスを切り替える、VSCode拡張
+See [Code/ReadMe.md](Code/README.md).
