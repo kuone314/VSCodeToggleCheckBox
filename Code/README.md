@@ -1,6 +1,6 @@
 # VSCodeToggleCheckBox
 
-![Sample](./Doc/Demonstration.gif)
+![Sample](Code/Doc/Demonstration.gif)
 
 * Toggle check box on/off.  
   チェックボックスの切り替えを行います。
