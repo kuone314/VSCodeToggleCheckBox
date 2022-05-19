@@ -4,6 +4,7 @@
   "description": "",
   "version": "0.0.1",
   "repository": "https://github.com/kuone314/VSCodeToggleCheckBox",
+  "icon": "icon.png",
   "engines": {
     "vscode": "^1.66.0"
   },
