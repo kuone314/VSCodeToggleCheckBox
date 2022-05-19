@@ -1,3 +1,7 @@
+![badge](https://img.shields.io/github/issues/kuone314/VSCodeToggleCheckBox)
+![badge](https://img.shields.io/github/forks/kuone314/VSCodeToggleCheckBox)
+![badge](https://img.shields.io/github/stars/kuone314/VSCodeToggleCheckBox)
+
 # Switch Markdown Check Box
 
 ![Sample](Code/Doc/Demonstration.gif)
