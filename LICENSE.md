@@ -1,1 +1,0 @@
-D:/Data/Study/VSCodeExtension/CheckBox/check-box-switcher/code/LICENSE.md
