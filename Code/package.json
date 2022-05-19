@@ -1,8 +1,11 @@
 {
   "name": "check-box-switcher",
-  "displayName": "check-box-switcher",
+  "displayName": "Check Box Switcher",
   "description": "",
-  "version": "0.0.1",
+  "version": "1.0.2",
+  "repository": "https://github.com/kuone314/VSCodeToggleCheckBox",
+  "publisher": "kuone",
+  "icon": "icon.png",
   "engines": {
     "vscode": "^1.66.0"
   },
