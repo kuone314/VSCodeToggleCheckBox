@@ -1,4 +1,4 @@
-# VSCodeToggleCheckBox
+# Switch Markdown Check Box
 
 ![Sample](Code/Doc/Demonstration.gif)
 
