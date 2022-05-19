@@ -1,10 +1,1 @@
-# Switch Markdown Check Box
-
-![Sample](Code/Doc/Demonstration.gif)
-
-* Toggle check box on/off.  
-  チェックボックスの切り替えを行います。
-
-* Supporting nested check box, as OrgMode.  
-  OrgMode の様に、入れ子のチェックボックスに対応しています。
-
+D:/Data/Study/VSCodeExtension/CheckBox/check-box-switcher/README.md
