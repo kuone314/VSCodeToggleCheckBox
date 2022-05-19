@@ -12,3 +12,7 @@
 * Supporting nested check box, as OrgMode.  
   OrgMode の様に、入れ子のチェックボックスに対応しています。
 
+# Link
+
+* [GitHub](https://github.com/kuone314/VSCodeToggleCheckBox)
+* [Twitter](https://twitter.com/KuoneTech)
