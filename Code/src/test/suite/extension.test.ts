@@ -67,7 +67,7 @@ async function testIndentLevel() {
 	for (const testLineNo of range(0, document.lineCount)) {
 		const answer = parseInt(document.lineAt(testLineNo).text);
 		const calced = indentLevel(document, tabSize, testLineNo);
-		assert.equal(answer, calced, "");
+		assert.strictEqual(answer, calced, "");
 	}
 }
 
