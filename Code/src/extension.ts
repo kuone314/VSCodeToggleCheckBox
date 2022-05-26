@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
 import * as Enumerable from "linq-es2015";
+import { assert } from "node:console";
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 const CHECK_TYPE = {
@@ -145,7 +146,7 @@ export function applyCheckBoxStatus(editBuilder: vscode.TextEditorEdit, document
 		const lineString = document.lineAt(lineNo).text;
 
 		const curCheckType = getCheckType(lineString);
-		if (!curCheckType) { return; }
+		if (!curCheckType) { assert(false); continue; }
 
 		const newLineStr = lineString.replace(checkBoxStr(curCheckType), checkBoxStr(newCheckType));
 		editBuilder.replace(document.lineAt(lineNo).range, newLineStr);
