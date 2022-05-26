@@ -92,9 +92,7 @@ function isChildCheckBox(document: vscode.TextDocument, tabSize: number, parentL
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-function getChildCheckBox(document: vscode.TextDocument, tabSize: number, lineNo: number): Array<number> {
-	const trgCluster = getCluster(document, lineNo);
-
+function getChildCheckBox(document: vscode.TextDocument, tabSize: number, trgCluster: LineRange, lineNo: number): Array<number> {
 	var result = new Array<number>();
 	for (var trg = lineNo.valueOf(); trg <= trgCluster[1]; trg += 1) {
 		if (isChildCheckBox(document, tabSize, lineNo, trg)) { result.push(trg); }
@@ -103,9 +101,7 @@ function getChildCheckBox(document: vscode.TextDocument, tabSize: number, lineNo
 	return result;
 }
 
-function getParentCheckBox(document: vscode.TextDocument, tabSize: number, lineNo: number): Array<number> {
-	const trgCluster = getCluster(document, lineNo);
-
+function getParentCheckBox(document: vscode.TextDocument, tabSize: number, trgCluster: LineRange, lineNo: number): Array<number> {
 	var result = new Array<number>();
 	for (var trg = trgCluster[0].valueOf(); trg <= lineNo; trg += 1) {
 		if (isChildCheckBox(document, tabSize, trg, lineNo)) { result.push(trg); }
@@ -127,8 +123,8 @@ function getCheckBoxStatus(document: vscode.TextDocument, lineRange: LineRange):
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-function detectChackStateFromChild(document: vscode.TextDocument, tabSize: number, chackBoxState: Map<number, CheckType>, lineNo: number): CheckType {
-	const childCheckAry = getChildCheckBox(document, tabSize, lineNo);
+function detectChackStateFromChild(document: vscode.TextDocument, tabSize: number, trgCluster: LineRange, chackBoxState: Map<number, CheckType>, lineNo: number): CheckType {
+	const childCheckAry = getChildCheckBox(document, tabSize, trgCluster, lineNo);
 
 	var result: CheckType = CHECK_TYPE.mixed;
 	for (const childCheck of childCheckAry) {
@@ -204,16 +200,16 @@ export function calcNewCheckBoxStatus(
 		const newCheckType = (orgCheckType === CHECK_TYPE.on) ? CHECK_TYPE.off : CHECK_TYPE.on;
 		newCheckBoxStatus.set(lineNo, newCheckType);
 
-		const childCheckBocLineNoAry = getChildCheckBox(document, tabSize, lineNo);
+		const childCheckBocLineNoAry = getChildCheckBox(document, tabSize, trgCluster, lineNo);
 		for (const childCheckBocLineNo of childCheckBocLineNoAry) {
 			newCheckBoxStatus.set(childCheckBocLineNo, newCheckType);
 		}
 
-		let parentCheckBocLineNoAry = getParentCheckBox(document, tabSize, lineNo);
+		let parentCheckBocLineNoAry = getParentCheckBox(document, tabSize, trgCluster, lineNo);
 		parentCheckBocLineNoAry.sort();
 		parentCheckBocLineNoAry.reverse();
 		for (const parentCheckBocLineNo of parentCheckBocLineNoAry) {
-			const newCheckType = detectChackStateFromChild(document, tabSize, newCheckBoxStatus, parentCheckBocLineNo);
+			const newCheckType = detectChackStateFromChild(document, tabSize, trgCluster, newCheckBoxStatus, parentCheckBocLineNo);
 			newCheckBoxStatus.set(parentCheckBocLineNo, newCheckType);
 		}
 	}
