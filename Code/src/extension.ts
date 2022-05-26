@@ -148,6 +148,8 @@ export function applyCheckBoxStatus(editBuilder: vscode.TextEditorEdit, document
 		const curCheckType = getCheckType(lineString);
 		if (!curCheckType) { assert(false); continue; }
 
+		if (newCheckType === curCheckType) { continue; }
+
 		const newLineStr = lineString.replace(checkBoxStr(curCheckType), checkBoxStr(newCheckType));
 		editBuilder.replace(document.lineAt(lineNo).range, newLineStr);
 	}
