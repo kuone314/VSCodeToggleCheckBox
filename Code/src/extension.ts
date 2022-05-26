@@ -71,7 +71,7 @@ export function indentLevel(document: vscode.TextDocument, tabSize: number, line
 
 		if (str === ' ') {
 			result++;
-		} else{
+		} else {
 			result = result - result % tabSize + tabSize;
 		}
 	}
@@ -162,7 +162,7 @@ function applyCheckBoxStatus(editBuilder: vscode.TextEditorEdit, document: vscod
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-function groupingLineNoAry(document: vscode.TextDocument, lineNoAry: Enumerable.Enumerable<number>) {
+function groupingLineNoAry(document: vscode.TextDocument, lineNoAry: Enumerable.Enumerable<number>): Array<[LineRange, number[]]> {
 	var result = new Array<[LineRange, Lines]>();
 
 	const includeInLastCluster = (lineNo: number) => {
