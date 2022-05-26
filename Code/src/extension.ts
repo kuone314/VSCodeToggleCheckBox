@@ -187,6 +187,43 @@ function groupingLineNoAry(document: vscode.TextDocument, lineNoAry: Enumerable.
 	return result;
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////
+function calcNewCheckBoxStatus(
+	document: vscode.TextDocument,
+	trgCluster: LineRange,
+	lineNoAry: Lines,
+	tabSize: number
+): Map<number, CheckType> {
+
+	const orgheckBoxStatus = getCheckBoxStatus(document, trgCluster);
+
+	var newCheckBoxStatus = orgheckBoxStatus;
+
+	for (const lineNo of lineNoAry) {
+		const orgCheckType = getCheckType(document.lineAt(lineNo).text);
+		if (!orgCheckType) { continue; }
+
+		const newCheckType = (orgCheckType === CHECK_TYPE.on) ? CHECK_TYPE.off : CHECK_TYPE.on;
+		newCheckBoxStatus.set(lineNo, newCheckType);
+
+		const childCheckBocLineNoAry = getChildCheckBox(document, tabSize, lineNo);
+		for (const childCheckBocLineNo of childCheckBocLineNoAry) {
+			newCheckBoxStatus.set(childCheckBocLineNo, newCheckType);
+		}
+
+		let parentCheckBocLineNoAry = getParentCheckBox(document, tabSize, lineNo);
+		parentCheckBocLineNoAry.sort();
+		parentCheckBocLineNoAry.reverse();
+		for (const parentCheckBocLineNo of parentCheckBocLineNoAry) {
+			const newCheckType = detectChackStateFromChild(document, tabSize, newCheckBoxStatus, parentCheckBocLineNo);
+			newCheckBoxStatus.set(parentCheckBocLineNo, newCheckType);
+		}
+	}
+
+	return newCheckBoxStatus;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
 function exec(editor: vscode.TextEditor, lineNoAry: Enumerable.Enumerable<number>) {
 	const document = editor.document;
 
@@ -201,31 +238,7 @@ function exec(editor: vscode.TextEditor, lineNoAry: Enumerable.Enumerable<number
 		const trgCluster = group[0];
 		const lineNoAry = group[1];
 
-		const orgheckBoxStatus = getCheckBoxStatus(document, trgCluster);
-
-		var newCheckBoxStatus = orgheckBoxStatus;
-
-		for (const lineNo of lineNoAry) {
-			const orgCheckType = getCheckType(document.lineAt(lineNo).text);
-			if (!orgCheckType) { continue; }
-
-			const newCheckType = (orgCheckType === CHECK_TYPE.on) ? CHECK_TYPE.off : CHECK_TYPE.on;
-			newCheckBoxStatus.set(lineNo, newCheckType);
-
-			const childCheckBocLineNoAry = getChildCheckBox(document, tabSize, lineNo);
-			for (const childCheckBocLineNo of childCheckBocLineNoAry) {
-				newCheckBoxStatus.set(childCheckBocLineNo, newCheckType);
-			}
-
-			let parentCheckBocLineNoAry = getParentCheckBox(document, tabSize, lineNo);
-			parentCheckBocLineNoAry.sort();
-			parentCheckBocLineNoAry.reverse();
-			for (const parentCheckBocLineNo of parentCheckBocLineNoAry) {
-				const newCheckType = detectChackStateFromChild(document, tabSize, newCheckBoxStatus, parentCheckBocLineNo);
-				newCheckBoxStatus.set(parentCheckBocLineNo, newCheckType);
-			}
-		}
-
+		const newCheckBoxStatus = calcNewCheckBoxStatus(document, trgCluster, lineNoAry, tabSize);
 		editor.edit(editBuilder => {
 			applyCheckBoxStatus(editBuilder, document, newCheckBoxStatus);
 		});
