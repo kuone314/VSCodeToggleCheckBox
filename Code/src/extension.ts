@@ -1,6 +1,10 @@
 import * as vscode from "vscode";
 import * as Enumerable from "linq-es2015";
 
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+type LineRange = [number, number];
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 const CHECK_TYPE = {
 	on: "on",
@@ -50,7 +54,7 @@ function serchClusterTerm(document: vscode.TextDocument, lineNo: number, serchDi
 	return range.First(clusterEnd);
 }
 
-export function getCluster(document: vscode.TextDocument, lineNo: number): [number, number] {
+export function getCluster(document: vscode.TextDocument, lineNo: number): LineRange {
 	return [
 		serchClusterTerm(document, lineNo, DIR.front),
 		serchClusterTerm(document, lineNo, DIR.back),
@@ -115,7 +119,7 @@ function getParentCheckBox(document: vscode.TextDocument, tabSize: number, lineN
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-function getCheckBoxStatus(document: vscode.TextDocument, lineRange: [number, number]): Map<number, CheckType> {
+function getCheckBoxStatus(document: vscode.TextDocument, lineRange: LineRange): Map<number, CheckType> {
 	var result = new Map<number, CheckType>();
 	for (var lineNo = lineRange[0]; lineNo <= lineRange[1]; lineNo++) {
 		const checkBoxType = getCheckType(document.lineAt(lineNo).text);
@@ -158,7 +162,7 @@ function applyCheckBoxStatus(editBuilder: vscode.TextEditorEdit, document: vscod
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 function groupingLineNoAry(document: vscode.TextDocument, lineNoAry: Enumerable.Enumerable<number>) {
-	var result = new Array<[[number, number], number[]]>();
+	var result = new Array<[LineRange, number[]]>();
 
 	const includeInLastCluster = (lineNo: number) => {
 		if (result.length === 0) { return false; }
