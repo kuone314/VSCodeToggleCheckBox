@@ -60,7 +60,7 @@ async function testGetCluster(testDataPath: string) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-async function testindentLevel() {
+async function testIndentLevel() {
 	const document = await vscode.workspace.openTextDocument(testsRoot + `/IndentTest.md`);
 	const tabSize = 2;
 
@@ -81,6 +81,6 @@ suite('Extension Test Suite', () => {
 	});
 
 	test('test indent Level', async () => {
-		await testindentLevel();
+		await testIndentLevel();
 	});
 });
