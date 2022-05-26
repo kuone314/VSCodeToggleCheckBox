@@ -4,6 +4,7 @@ import * as Enumerable from "linq-es2015";
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 type LineRange = [number, number];
+type Lines = number[];
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 const CHECK_TYPE = {
@@ -162,7 +163,7 @@ function applyCheckBoxStatus(editBuilder: vscode.TextEditorEdit, document: vscod
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 function groupingLineNoAry(document: vscode.TextDocument, lineNoAry: Enumerable.Enumerable<number>) {
-	var result = new Array<[LineRange, number[]]>();
+	var result = new Array<[LineRange, Lines]>();
 
 	const includeInLastCluster = (lineNo: number) => {
 		if (result.length === 0) { return false; }
