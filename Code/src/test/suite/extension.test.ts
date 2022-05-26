@@ -7,7 +7,7 @@ import * as vscode from 'vscode';
 
 import path = require('node:path');
 import { getCluster, indentLevel } from '../../extension';
-
+import { calcNewCheckBoxStatus, applyCheckBoxStatus } from '../../extension';
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 const testsRoot = path.resolve(__dirname, '../../../src/test/TestData');
 
@@ -60,27 +60,89 @@ async function testGetCluster(testDataPath: string) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-async function testindentLevel() {
+async function testIndentLevel() {
 	const document = await vscode.workspace.openTextDocument(testsRoot + `/IndentTest.md`);
 	const tabSize = 2;
 
 	for (const testLineNo of range(0, document.lineCount)) {
 		const answer = parseInt(document.lineAt(testLineNo).text);
 		const calced = indentLevel(document, tabSize, testLineNo);
-		assert.equal(answer, calced, "");
+		assert.strictEqual(answer, calced, "");
 	}
+}
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+async function execEdit(
+	document: vscode.TextDocument,
+	lineNoAry: number[]
+) {
+	const tabSize = 2;
+	const cluster = getCluster(document, lineNoAry[0]);
+	const newCheckBoxStatus = calcNewCheckBoxStatus(document, cluster, lineNoAry, tabSize);
+
+	let editor = await vscode.window.showTextDocument(document);
+	await editor.edit(editBuilder => {
+		applyCheckBoxStatus(editBuilder, document, newCheckBoxStatus);
+	});
+}
+
+async function checkText(
+	testName: string,
+	document: vscode.TextDocument,
+	expectedTextFilePath: string
+) {
+	const expectedDocument = await vscode.workspace.openTextDocument(expectedTextFilePath);
+
+	assert.strictEqual(
+		document.getText(),
+		expectedDocument.getText(),
+		testName
+	);
+}
+
+async function testEdit() {
+	const document = await vscode.workspace.openTextDocument(testsRoot + `/TestEdit/TestData.md`);
+
+	await execEdit(document, [1]);
+	await checkText(`Off => Mixed`, document, testsRoot + `/TestEdit/Result_1.md`);
+
+	await execEdit(document, [2]);
+	await checkText(`Mixed => On`, document, testsRoot + `/TestEdit/Result_2.md`);
+
+	await execEdit(document, [0]);
+	await checkText(`On => Off`, document, testsRoot + `/TestEdit/TestData.md`);
+
+	await execEdit(document, [7, 9]);
+	await checkText(`Off => Mixed(Deep,Multi)`, document, testsRoot + `/TestEdit/Result_3.md`);
+
+	await execEdit(document, [8]);
+	await checkText(`Mixed => Mixed`, document, testsRoot + `/TestEdit/Result_4.md`);
+
+	await execEdit(document, [7]);
+	await checkText(`Mixed => Off`, document, testsRoot + `/TestEdit/TestData.md`);
+
+	await execEdit(document, [11]);
+	await checkText(`Off => On`, document, testsRoot + `/TestEdit/Result_5.md`);
+
+	await execEdit(document, [14]);
+	await checkText(`On => Mixed`, document, testsRoot + `/TestEdit/Result_6.md`);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 suite('Extension Test Suite', () => {
-	test('test get cluster', async () => {
-		await testGetCluster(testsRoot + `/TestData_1.md`);
-		await testGetCluster(testsRoot + `/TestData_2.md`);
-		await testGetCluster(testsRoot + `/TestData_3.md`);
-		await testGetCluster(testsRoot + `/TestData_4.md`);
-	});
+	// test('test get cluster', async () => {
+	// 	await testGetCluster(testsRoot + `/TestData_1.md`);
+	// 	await testGetCluster(testsRoot + `/TestData_2.md`);
+	// 	await testGetCluster(testsRoot + `/TestData_3.md`);
+	// 	await testGetCluster(testsRoot + `/TestData_4.md`);
+	// });
 
-	test('test indent Level', async () => {
-		await testindentLevel();
+	// test('test indent Level', async () => {
+	// 	await testIndentLevel();
+	// });
+
+	test('test edit', async () => {
+		await testEdit();
 	});
 });
