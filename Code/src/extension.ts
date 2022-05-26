@@ -1,11 +1,6 @@
 import * as vscode from "vscode";
 import * as Enumerable from "linq-es2015";
 
-
-///////////////////////////////////////////////////////////////////////////////////////////////////
-type LineRange = [number, number];
-type Lines = number[];
-
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 const CHECK_TYPE = {
 	on: "on",
@@ -147,7 +142,7 @@ function detectChackStateFromChild(document: vscode.TextDocument, tabSize: numbe
 	return result;
 }
 
-function applyCheckBoxStatus(editBuilder: vscode.TextEditorEdit, document: vscode.TextDocument, checkBoxStatus: Map<number, CheckType>) {
+export function applyCheckBoxStatus(editBuilder: vscode.TextEditorEdit, document: vscode.TextDocument, checkBoxStatus: Map<number, CheckType>) {
 	for (var item of checkBoxStatus) {
 		const lineNo = item[0];
 		const newCheckType = item[1];
@@ -162,7 +157,10 @@ function applyCheckBoxStatus(editBuilder: vscode.TextEditorEdit, document: vscod
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-function groupingLineNoAry(document: vscode.TextDocument, lineNoAry: Enumerable.Enumerable<number>): Array<[LineRange, number[]]> {
+type LineRange = [number, number];
+type Lines = number[];
+
+function groupingLineNoAry(document: vscode.TextDocument, lineNoAry: Enumerable.Enumerable<number>): Array<[LineRange, Lines]> {
 	var result = new Array<[LineRange, Lines]>();
 
 	const includeInLastCluster = (lineNo: number) => {
@@ -188,7 +186,7 @@ function groupingLineNoAry(document: vscode.TextDocument, lineNoAry: Enumerable.
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-function calcNewCheckBoxStatus(
+export function calcNewCheckBoxStatus(
 	document: vscode.TextDocument,
 	trgCluster: LineRange,
 	lineNoAry: Lines,
