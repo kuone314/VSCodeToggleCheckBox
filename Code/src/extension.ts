@@ -221,7 +221,7 @@ export function calcNewCheckBoxStatus(
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-function exec(editor: vscode.TextEditor, lineNoAry: Enumerable.Enumerable<number>) {
+async function exec(editor: vscode.TextEditor, lineNoAry: Enumerable.Enumerable<number>) {
 	const document = editor.document;
 
 	const tabSize = (typeof editor.options.tabSize === "number")
@@ -236,7 +236,7 @@ function exec(editor: vscode.TextEditor, lineNoAry: Enumerable.Enumerable<number
 		const lineNoAry = group[1];
 
 		const newCheckBoxStatus = calcNewCheckBoxStatus(document, trgCluster, lineNoAry, tabSize);
-		editor.edit(editBuilder => {
+		await editor.edit(editBuilder => {
 			applyCheckBoxStatus(editBuilder, document, newCheckBoxStatus);
 		});
 	}
