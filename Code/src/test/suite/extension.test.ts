@@ -4,6 +4,7 @@ import * as assert from 'assert';
 // as well as import your extension to test it
 import * as vscode from 'vscode';
 // import * as myExtension from '../../extension';
+import * as Enumerable from "linq-es2015";
 
 import path = require('node:path');
 import { getCluster, indentLevel } from '../../extension';
@@ -83,7 +84,7 @@ async function execEdit(
 
 	let editor = await vscode.window.showTextDocument(document);
 	await editor.edit(editBuilder => {
-		applyCheckBoxStatus(editBuilder, document, newCheckBoxStatus);
+		applyCheckBoxStatus(editBuilder, document, Enumerable.from(newCheckBoxStatus));
 	});
 }
 

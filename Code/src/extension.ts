@@ -139,7 +139,7 @@ function detectChackStateFromChild(document: vscode.TextDocument, tabSize: numbe
 	return result;
 }
 
-export function applyCheckBoxStatus(editBuilder: vscode.TextEditorEdit, document: vscode.TextDocument, checkBoxStatus: Map<number, CheckType>) {
+export function applyCheckBoxStatus(editBuilder: vscode.TextEditorEdit, document: vscode.TextDocument, checkBoxStatus: Enumerable.Enumerable<[number, CheckType]>) {
 	for (var item of checkBoxStatus) {
 		const lineNo = item[0];
 		const newCheckType = item[1];
@@ -234,7 +234,7 @@ function exec(editor: vscode.TextEditor, lineNoAry: Enumerable.Enumerable<number
 	const newCheckBoxStatus = Enumerable.from(groupAry).SelectMany(group => [...calcNewCheckBoxStatus(document, group[0], group[1], tabSize)]);
 
 	editor.edit(editBuilder => {
-		applyCheckBoxStatus(editBuilder, document, new Map(newCheckBoxStatus));
+		applyCheckBoxStatus(editBuilder, document, newCheckBoxStatus);
 	});
 }
 
