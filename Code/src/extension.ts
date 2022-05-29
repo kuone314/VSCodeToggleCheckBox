@@ -231,15 +231,11 @@ function exec(editor: vscode.TextEditor, lineNoAry: Enumerable.Enumerable<number
 	const groupAry = groupingLineNoAry(document, lineNoAry);
 	if (groupAry.length === 0) { return; }
 
-	for (const group of groupAry) {
-		const trgCluster = group[0];
-		const lineNoAry = group[1];
+	const newCheckBoxStatus = Enumerable.from(groupAry).SelectMany(group => [...calcNewCheckBoxStatus(document, group[0], group[1], tabSize)]);
 
-		const newCheckBoxStatus = calcNewCheckBoxStatus(document, trgCluster, lineNoAry, tabSize);
-		editor.edit(editBuilder => {
-			applyCheckBoxStatus(editBuilder, document, newCheckBoxStatus);
-		});
-	}
+	editor.edit(editBuilder => {
+		applyCheckBoxStatus(editBuilder, document, new Map(newCheckBoxStatus));
+	});
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
