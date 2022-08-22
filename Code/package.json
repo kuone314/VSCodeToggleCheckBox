@@ -1,8 +1,8 @@
 {
   "name": "check-box-switcher",
   "displayName": "Check Box Switcher",
-  "description": "",
-  "version": "1.0.6",
+  "description": "OrgMode like check box.",
+  "version": "1.0.8",
   "repository": "https://github.com/kuone314/VSCodeToggleCheckBox",
   "publisher": "kuone",
   "icon": "icon.png",
