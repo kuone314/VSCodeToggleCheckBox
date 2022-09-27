@@ -13,7 +13,8 @@
     "Other"
   ],
   "activationEvents": [
-    "onCommand:check-box-switcher.toggle check box"
+    "onCommand:check-box-switcher.toggle check box",
+    "onLanguage:markdown"
   ],
   "main": "./out/extension.js",
   "contributes": {
