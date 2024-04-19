@@ -26,15 +26,15 @@ function getCheckType(lineStr: string): CheckType | null {
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-const DIR = {
+const DIRECTION = {
 	front: -1,
 	back: +1,
 };
-type Dir = typeof DIR[keyof typeof DIR];
+type Direction = typeof DIRECTION[keyof typeof DIRECTION];
 function serchClusterTerm(
 	document: vscode.TextDocument,
 	lineNo: number,
-	serchDir: Dir
+	serchDir: Direction
 ): number {
 	const isEmptyLine = (lineNo: number) => {
 		if (lineNo < 0 || document.lineCount <= lineNo) { return true; }
@@ -43,7 +43,7 @@ function serchClusterTerm(
 		;
 	if (isEmptyLine(lineNo)) { return lineNo; }
 
-	const range = (serchDir === DIR.front)
+	const range = (serchDir === DIRECTION.front)
 		? Enumerable.range(0, lineNo + 1).Reverse()
 		: Enumerable.range(lineNo, document.lineCount - lineNo + 1);
 
@@ -60,8 +60,8 @@ export function getCluster(
 	lineNo: number
 ): LineRange {
 	return [
-		serchClusterTerm(document, lineNo, DIR.front),
-		serchClusterTerm(document, lineNo, DIR.back),
+		serchClusterTerm(document, lineNo, DIRECTION.front),
+		serchClusterTerm(document, lineNo, DIRECTION.back),
 	];
 }
 
