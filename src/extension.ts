@@ -283,6 +283,15 @@ function exec(editor: vscode.TextEditor, lineNoAry: Enumerable.Enumerable<number
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
+function onDidChangeTextDocument(event: vscode.TextDocumentChangeEvent) {
+	if (event.contentChanges.length === 0) { return; }
+	if (
+		event.reason === vscode.TextDocumentChangeReason.Undo ||
+		event.reason === vscode.TextDocumentChangeReason.Redo
+	) { return; }
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
 let disposables: vscode.Disposable[] = [];
 
 export function activate(context: vscode.ExtensionContext) {
@@ -297,5 +306,12 @@ export function activate(context: vscode.ExtensionContext) {
 		);
 	});
 
+	disposer = vscode.workspace.onDidChangeTextDocument(onDidChangeTextDocument);
+
 	context.subscriptions.push(disposable);
+}
+
+let disposer: vscode.Disposable;
+export function deactivate() {
+	disposer?.dispose();
 }
