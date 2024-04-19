@@ -236,10 +236,7 @@ export function calcNewCheckBoxStatus(
 	lineNoAry: Lines,
 	tabSize: number
 ): Map<number, CheckType> {
-
-	const orgheckBoxStatus = getCheckBoxStatus(document, trgCluster);
-
-	var newCheckBoxStatus = orgheckBoxStatus;
+	var newCheckBoxStatus = getCheckBoxStatus(document, trgCluster);
 
 	for (const lineNo of lineNoAry) {
 		const orgCheckType = getCheckType(document.lineAt(lineNo).text);
