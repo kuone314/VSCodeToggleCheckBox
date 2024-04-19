@@ -204,13 +204,13 @@ type Lines = number[];
 function groupingLineNoAry(
 	document: vscode.TextDocument,
 	lineNoAry: Enumerable.Enumerable<number>
-): Array<[LineRange, Lines]> {
-	var result = new Array<[LineRange, Lines]>();
+): Array<{ cluster: LineRange, lines: Lines }> {
+	var result = new Array<{ cluster: LineRange, lines: Lines }>();
 
 	const includeInLastCluster = (lineNo: number) => {
 		if (result.length === 0) { return false; }
 
-		const lastCluster = result[result.length - 1][0];
+		const lastCluster = result[result.length - 1].cluster;
 		return lastCluster[0] <= lineNo && lineNo <= lastCluster[1];
 	};
 
@@ -220,11 +220,11 @@ function groupingLineNoAry(
 		if (!checkType) { continue; }
 
 		if (includeInLastCluster(lineNo)) {
-			result[result.length - 1][1].push(lineNo);
+			result[result.length - 1].lines.push(lineNo);
 			continue;
 		}
 
-		result.push([getCluster(document, lineNo), [lineNo]]);
+		result.push({ cluster: getCluster(document, lineNo), lines: [lineNo] });
 	}
 	return result;
 }
@@ -278,7 +278,7 @@ function exec(editor: vscode.TextEditor, lineNoAry: Enumerable.Enumerable<number
 
 	const newCheckBoxStatus = Enumerable.from(groupAry)
 		.SelectMany(group =>
-			[...calcNewCheckBoxStatus(document, group[0], group[1], tabSize)]);
+			[...calcNewCheckBoxStatus(document, group.cluster, group.lines, tabSize)]);
 
 	editor.edit(editBuilder => {
 		applyCheckBoxStatus(editBuilder, document, newCheckBoxStatus);
