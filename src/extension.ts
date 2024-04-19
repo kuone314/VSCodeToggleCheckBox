@@ -203,17 +203,17 @@ export function calcNewCheckBoxStatus(
 		const newCheckType = (orgCheckType === CHECK_TYPE.on) ? CHECK_TYPE.off : CHECK_TYPE.on;
 		newCheckBoxStatus.set(lineNo, newCheckType);
 
-		const childCheckBocLineNoAry = getChildCheckBox(document, tabSize, trgCluster, lineNo);
-		for (const childCheckBocLineNo of childCheckBocLineNoAry) {
-			newCheckBoxStatus.set(childCheckBocLineNo, newCheckType);
+		const childCheckBoxLineNoAry = getChildCheckBox(document, tabSize, trgCluster, lineNo);
+		for (const childCheckBoxLineNo of childCheckBoxLineNoAry) {
+			newCheckBoxStatus.set(childCheckBoxLineNo, newCheckType);
 		}
 
-		let parentCheckBocLineNoAry = getParentCheckBox(document, tabSize, trgCluster, lineNo);
-		parentCheckBocLineNoAry.sort();
-		parentCheckBocLineNoAry.reverse();
-		for (const parentCheckBocLineNo of parentCheckBocLineNoAry) {
-			const newCheckType = detectChackStateFromChild(document, tabSize, trgCluster, newCheckBoxStatus, parentCheckBocLineNo);
-			newCheckBoxStatus.set(parentCheckBocLineNo, newCheckType);
+		let parentCheckBoxLineNoAry = getParentCheckBox(document, tabSize, trgCluster, lineNo);
+		parentCheckBoxLineNoAry.sort();
+		parentCheckBoxLineNoAry.reverse();
+		for (const parentCheckBoxLineNo of parentCheckBoxLineNoAry) {
+			const newCheckType = detectChackStateFromChild(document, tabSize, trgCluster, newCheckBoxStatus, parentCheckBoxLineNo);
+			newCheckBoxStatus.set(parentCheckBoxLineNo, newCheckType);
 		}
 	}
 
