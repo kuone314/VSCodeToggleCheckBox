@@ -303,6 +303,10 @@ function isEqual(
 }
 
 function onDidChangeTextDocument(event: vscode.TextDocumentChangeEvent) {
+	const config = vscode.workspace.getConfiguration('CheckBoxSwitcher');
+	const enable = config.get<boolean>('EnableAutoMaintenance') ?? true;
+	if (!enable) { return; }
+
 	if (event.contentChanges.length === 0) { return; }
 	if (
 		event.reason === vscode.TextDocumentChangeReason.Undo ||
@@ -357,6 +361,12 @@ function onDidChangeTextDocument(event: vscode.TextDocumentChangeEvent) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
+function setEnabelAutoMaintenance(enable: boolean) {
+	const config = vscode.workspace.getConfiguration('CheckBoxSwitcher');
+	config.update('EnableAutoMaintenance', enable, true);
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
 let disposables: vscode.Disposable[] = [];
 
 export function activate(context: vscode.ExtensionContext) {
@@ -371,6 +381,16 @@ export function activate(context: vscode.ExtensionContext) {
 			);
 		})
 	);
+
+	context.subscriptions.push(
+		vscode.commands.registerCommand('check-box-switcher.enable auto maintenance', () => {
+			setEnabelAutoMaintenance(true);
+		}));
+
+	context.subscriptions.push(
+		vscode.commands.registerCommand('check-box-switcher.disable auto maintenance', () => {
+			setEnabelAutoMaintenance(false);
+		}));
 
 	disposer = vscode.workspace.onDidChangeTextDocument(onDidChangeTextDocument);
 }

@@ -22,8 +22,25 @@
       {
         "command": "check-box-switcher.toggle check box",
         "title": "Toggle Check Box"
+      },
+      {
+        "command": "check-box-switcher.enable auto maintenance",
+        "title": "Check Box Switcher:Enable Auto Maintenance"
+      },
+      {
+        "command": "check-box-switcher.disable auto maintenance",
+        "title": "Check Box Switcher:Disable Auto Maintenance"
       }
-    ]
+    ],
+    "configuration": {
+      "title": "check-box-switcher",
+      "properties": {
+        "CheckBoxSwitcher.EnableAutoMaintenance": {
+          "type": "boolean",
+          "default": true
+        }
+      }
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
