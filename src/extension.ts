@@ -360,20 +360,19 @@ function onDidChangeTextDocument(event: vscode.TextDocumentChangeEvent) {
 let disposables: vscode.Disposable[] = [];
 
 export function activate(context: vscode.ExtensionContext) {
+	context.subscriptions.push(
+		vscode.commands.registerCommand('check-box-switcher.toggle check box', () => {
+			const editor = vscode.window.activeTextEditor;
+			if (!editor) { return; }
 
-	const disposable = vscode.commands.registerCommand('check-box-switcher.toggle check box', () => {
-		const editor = vscode.window.activeTextEditor;
-		if (!editor) { return; }
-
-		exec(
-			editor,
-			Enumerable.from(editor.selections).Select(selection => selection.active.line)
-		);
-	});
+			exec(
+				editor,
+				Enumerable.from(editor.selections).Select(selection => selection.active.line)
+			);
+		})
+	);
 
 	disposer = vscode.workspace.onDidChangeTextDocument(onDidChangeTextDocument);
-
-	context.subscriptions.push(disposable);
 }
 
 let disposer: vscode.Disposable;
