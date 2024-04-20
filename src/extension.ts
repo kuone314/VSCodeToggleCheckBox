@@ -26,12 +26,16 @@ function getCheckType(lineStr: string): CheckType | null {
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-const DIR = {
+const DIRECTION = {
 	front: -1,
 	back: +1,
 };
-type Dir = typeof DIR[keyof typeof DIR];
-function serchClusterTerm(document: vscode.TextDocument, lineNo: number, serchDir: Dir): number {
+type Direction = typeof DIRECTION[keyof typeof DIRECTION];
+function serchClusterTerm(
+	document: vscode.TextDocument,
+	lineNo: number,
+	serchDir: Direction
+): number {
 	const isEmptyLine = (lineNo: number) => {
 		if (lineNo < 0 || document.lineCount <= lineNo) { return true; }
 		return document.lineAt(lineNo).isEmptyOrWhitespace;
@@ -39,7 +43,7 @@ function serchClusterTerm(document: vscode.TextDocument, lineNo: number, serchDi
 		;
 	if (isEmptyLine(lineNo)) { return lineNo; }
 
-	const range = (serchDir === DIR.front)
+	const range = (serchDir === DIRECTION.front)
 		? Enumerable.range(0, lineNo + 1).Reverse()
 		: Enumerable.range(lineNo, document.lineCount - lineNo + 1);
 
@@ -51,15 +55,22 @@ function serchClusterTerm(document: vscode.TextDocument, lineNo: number, serchDi
 	return range.First(clusterEnd);
 }
 
-export function getCluster(document: vscode.TextDocument, lineNo: number): LineRange {
+export function getCluster(
+	document: vscode.TextDocument,
+	lineNo: number
+): LineRange {
 	return [
-		serchClusterTerm(document, lineNo, DIR.front),
-		serchClusterTerm(document, lineNo, DIR.back),
+		serchClusterTerm(document, lineNo, DIRECTION.front),
+		serchClusterTerm(document, lineNo, DIRECTION.back),
 	];
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-export function indentLevel(document: vscode.TextDocument, tabSize: number, lineNo: number): number {
+export function indentLevel(
+	document: vscode.TextDocument,
+	tabSize: number,
+	lineNo: number
+): number {
 	const lineStr = document.lineAt(lineNo.valueOf()).text;
 	var result = 0;
 	for (const str of lineStr) {
@@ -75,11 +86,19 @@ export function indentLevel(document: vscode.TextDocument, tabSize: number, line
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-function isCheckBox(document: vscode.TextDocument, lineNo: Number): boolean {
+function isCheckBox(
+	document: vscode.TextDocument,
+	lineNo: Number
+): boolean {
 	return getCheckType(document.lineAt(lineNo.valueOf()).text) !== null;
 }
 
-function isChildCheckBox(document: vscode.TextDocument, tabSize: number, parentLineNo: number, childLineNo: number): boolean {
+function isChildCheckBox(
+	document: vscode.TextDocument,
+	tabSize: number,
+	parentLineNo: number,
+	childLineNo: number
+): boolean {
 	if (parentLineNo >= childLineNo) { return false; }
 	if (!isCheckBox(document, parentLineNo)) { return false; }
 	if (!isCheckBox(document, childLineNo)) { return false; }
@@ -93,7 +112,12 @@ function isChildCheckBox(document: vscode.TextDocument, tabSize: number, parentL
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-function getChildCheckBox(document: vscode.TextDocument, tabSize: number, trgCluster: LineRange, lineNo: number): Array<number> {
+function getChildCheckBox(
+	document: vscode.TextDocument,
+	tabSize: number,
+	trgCluster: LineRange,
+	lineNo: number
+): Array<number> {
 	var result = new Array<number>();
 	for (var trg = lineNo.valueOf(); trg <= trgCluster[1]; trg += 1) {
 		if (isChildCheckBox(document, tabSize, lineNo, trg)) { result.push(trg); }
@@ -102,7 +126,12 @@ function getChildCheckBox(document: vscode.TextDocument, tabSize: number, trgClu
 	return result;
 }
 
-function getParentCheckBox(document: vscode.TextDocument, tabSize: number, trgCluster: LineRange, lineNo: number): Array<number> {
+function getParentCheckBox(
+	document: vscode.TextDocument,
+	tabSize: number,
+	trgCluster: LineRange,
+	lineNo: number
+): Array<number> {
 	var result = new Array<number>();
 	for (var trg = trgCluster[0].valueOf(); trg <= lineNo; trg += 1) {
 		if (isChildCheckBox(document, tabSize, trg, lineNo)) { result.push(trg); }
@@ -112,7 +141,10 @@ function getParentCheckBox(document: vscode.TextDocument, tabSize: number, trgCl
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-function getCheckBoxStatus(document: vscode.TextDocument, lineRange: LineRange): Map<number, CheckType> {
+function getCheckBoxStatus(
+	document: vscode.TextDocument,
+	lineRange: LineRange
+): Map<number, CheckType> {
 	var result = new Map<number, CheckType>();
 	for (var lineNo = lineRange[0]; lineNo <= lineRange[1]; lineNo++) {
 		const checkBoxType = getCheckType(document.lineAt(lineNo).text);
@@ -124,7 +156,13 @@ function getCheckBoxStatus(document: vscode.TextDocument, lineRange: LineRange):
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-function detectChackStateFromChild(document: vscode.TextDocument, tabSize: number, trgCluster: LineRange, chackBoxState: Map<number, CheckType>, lineNo: number): CheckType {
+function detectChackStateFromChild(
+	document: vscode.TextDocument,
+	tabSize: number,
+	trgCluster: LineRange,
+	chackBoxState: Map<number, CheckType>,
+	lineNo: number
+): CheckType {
 	const childCheckAry = getChildCheckBox(document, tabSize, trgCluster, lineNo);
 
 	var result: CheckType = CHECK_TYPE.mixed;
@@ -139,7 +177,11 @@ function detectChackStateFromChild(document: vscode.TextDocument, tabSize: numbe
 	return result;
 }
 
-export function applyCheckBoxStatus(editBuilder: vscode.TextEditorEdit, document: vscode.TextDocument, checkBoxStatus: Enumerable.Enumerable<[number, CheckType]>) {
+export function applyCheckBoxStatus(
+	editBuilder: vscode.TextEditorEdit,
+	document: vscode.TextDocument,
+	checkBoxStatus: Enumerable.Enumerable<[number, CheckType]>
+) {
 	for (var item of checkBoxStatus) {
 		const lineNo = item[0];
 		const newCheckType = item[1];
@@ -159,13 +201,16 @@ export function applyCheckBoxStatus(editBuilder: vscode.TextEditorEdit, document
 type LineRange = [number, number];
 type Lines = number[];
 
-function groupingLineNoAry(document: vscode.TextDocument, lineNoAry: Enumerable.Enumerable<number>): Array<[LineRange, Lines]> {
-	var result = new Array<[LineRange, Lines]>();
+function groupingLineNoAry(
+	document: vscode.TextDocument,
+	lineNoAry: Enumerable.Enumerable<number>
+): Array<{ cluster: LineRange, lines: Lines }> {
+	var result = new Array<{ cluster: LineRange, lines: Lines }>();
 
 	const includeInLastCluster = (lineNo: number) => {
 		if (result.length === 0) { return false; }
 
-		const lastCluster = result[result.length - 1][0];
+		const lastCluster = result[result.length - 1].cluster;
 		return lastCluster[0] <= lineNo && lineNo <= lastCluster[1];
 	};
 
@@ -175,11 +220,11 @@ function groupingLineNoAry(document: vscode.TextDocument, lineNoAry: Enumerable.
 		if (!checkType) { continue; }
 
 		if (includeInLastCluster(lineNo)) {
-			result[result.length - 1][1].push(lineNo);
+			result[result.length - 1].lines.push(lineNo);
 			continue;
 		}
 
-		result.push([getCluster(document, lineNo), [lineNo]]);
+		result.push({ cluster: getCluster(document, lineNo), lines: [lineNo] });
 	}
 	return result;
 }
@@ -191,10 +236,7 @@ export function calcNewCheckBoxStatus(
 	lineNoAry: Lines,
 	tabSize: number
 ): Map<number, CheckType> {
-
-	const orgheckBoxStatus = getCheckBoxStatus(document, trgCluster);
-
-	var newCheckBoxStatus = orgheckBoxStatus;
+	var newCheckBoxStatus = getCheckBoxStatus(document, trgCluster);
 
 	for (const lineNo of lineNoAry) {
 		const orgCheckType = getCheckType(document.lineAt(lineNo).text);
@@ -203,17 +245,17 @@ export function calcNewCheckBoxStatus(
 		const newCheckType = (orgCheckType === CHECK_TYPE.on) ? CHECK_TYPE.off : CHECK_TYPE.on;
 		newCheckBoxStatus.set(lineNo, newCheckType);
 
-		const childCheckBocLineNoAry = getChildCheckBox(document, tabSize, trgCluster, lineNo);
-		for (const childCheckBocLineNo of childCheckBocLineNoAry) {
-			newCheckBoxStatus.set(childCheckBocLineNo, newCheckType);
+		const childCheckBoxLineNoAry = getChildCheckBox(document, tabSize, trgCluster, lineNo);
+		for (const childCheckBoxLineNo of childCheckBoxLineNoAry) {
+			newCheckBoxStatus.set(childCheckBoxLineNo, newCheckType);
 		}
 
-		let parentCheckBocLineNoAry = getParentCheckBox(document, tabSize, trgCluster, lineNo);
-		parentCheckBocLineNoAry.sort();
-		parentCheckBocLineNoAry.reverse();
-		for (const parentCheckBocLineNo of parentCheckBocLineNoAry) {
-			const newCheckType = detectChackStateFromChild(document, tabSize, trgCluster, newCheckBoxStatus, parentCheckBocLineNo);
-			newCheckBoxStatus.set(parentCheckBocLineNo, newCheckType);
+		let parentCheckBoxLineNoAry = getParentCheckBox(document, tabSize, trgCluster, lineNo);
+		parentCheckBoxLineNoAry.sort();
+		parentCheckBoxLineNoAry.reverse();
+		for (const parentCheckBoxLineNo of parentCheckBoxLineNoAry) {
+			const newCheckType = detectChackStateFromChild(document, tabSize, trgCluster, newCheckBoxStatus, parentCheckBoxLineNo);
+			newCheckBoxStatus.set(parentCheckBoxLineNo, newCheckType);
 		}
 	}
 
@@ -231,7 +273,9 @@ function exec(editor: vscode.TextEditor, lineNoAry: Enumerable.Enumerable<number
 	const groupAry = groupingLineNoAry(document, lineNoAry);
 	if (groupAry.length === 0) { return; }
 
-	const newCheckBoxStatus = Enumerable.from(groupAry).SelectMany(group => [...calcNewCheckBoxStatus(document, group[0], group[1], tabSize)]);
+	const newCheckBoxStatus = Enumerable.from(groupAry)
+		.SelectMany(group =>
+			[...calcNewCheckBoxStatus(document, group.cluster, group.lines, tabSize)]);
 
 	editor.edit(editBuilder => {
 		applyCheckBoxStatus(editBuilder, document, newCheckBoxStatus);
@@ -239,19 +283,120 @@ function exec(editor: vscode.TextEditor, lineNoAry: Enumerable.Enumerable<number
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
+function getAllLines(document: vscode.TextDocument): number[] {
+	let result = [];
+	for (let idx = 0; idx < document.lineCount; idx++) {
+		result.push(idx);
+	}
+	return result;
+}
+
+function isEqual(
+	map1: Map<number, CheckType>,
+	map2: Map<number, CheckType>
+) {
+	if (map1.size !== map2.size) { return false; }
+	for (let [key, value] of map1) {
+		if (!map2.has(key) || map2.get(key) !== value) { return false; }
+	}
+	return true;
+}
+
+function onDidChangeTextDocument(event: vscode.TextDocumentChangeEvent) {
+	const config = vscode.workspace.getConfiguration('CheckBoxSwitcher');
+	const enable = config.get<boolean>('EnableAutoMaintenance') ?? true;
+	if (!enable) { return; }
+
+	if (event.contentChanges.length === 0) { return; }
+	if (
+		event.reason === vscode.TextDocumentChangeReason.Undo ||
+		event.reason === vscode.TextDocumentChangeReason.Redo
+	) { return; }
+
+	const editor = vscode.window.activeTextEditor;
+	if (!editor) { return; }
+	const document = editor.document;
+	const tabSize = (typeof editor.options.tabSize === "number")
+		? editor.options.tabSize
+		: 2;
+
+	const groupAry = groupingLineNoAry(document, Enumerable.from(getAllLines(document)));
+	if (groupAry.length === 0) { return; }
+
+
+	const orgCheckBoxStatus = getCheckBoxStatus(document, [0, document.lineCount - 1]);
+	var newCheckBoxStatus = new Map(orgCheckBoxStatus);
+	for (const group of groupAry) {
+		function isLeaf(lineNo: number): unknown {
+			const childCheckBoxList = getChildCheckBox(document, tabSize, group.cluster, lineNo);
+			return (childCheckBoxList.length === 0);
+		}
+
+		const leafLineNoList = group.lines.filter(isLeaf);
+		for (const lineNo of leafLineNoList) {
+			const orgCheckType = getCheckType(document.lineAt(lineNo).text);
+			if (!orgCheckType) { continue; }
+
+			const newCheckType = (orgCheckType === CHECK_TYPE.on) ? CHECK_TYPE.on : CHECK_TYPE.off;
+			newCheckBoxStatus.set(lineNo, newCheckType);
+
+			let parentCheckBoxLineNoAry = getParentCheckBox(document, tabSize, group.cluster, lineNo);
+			parentCheckBoxLineNoAry.sort();
+			parentCheckBoxLineNoAry.reverse();
+			for (const parentCheckBoxLineNo of parentCheckBoxLineNoAry) {
+				const newCheckType = detectChackStateFromChild(document, tabSize, group.cluster, newCheckBoxStatus, parentCheckBoxLineNo);
+				newCheckBoxStatus.set(parentCheckBoxLineNo, newCheckType);
+			}
+		}
+	}
+
+	if (isEqual(newCheckBoxStatus, orgCheckBoxStatus)) { return; }
+
+	vscode.window.showInformationMessage('Check Box Switcher: Auto Maintenance Execed');
+	editor.edit(
+		editBuilder => {
+			applyCheckBoxStatus(editBuilder, document, Enumerable.from(newCheckBoxStatus));
+		},
+		{ undoStopAfter: false, undoStopBefore: false }
+	);
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+function setEnabelAutoMaintenance(enable: boolean) {
+	const config = vscode.workspace.getConfiguration('CheckBoxSwitcher');
+	config.update('EnableAutoMaintenance', enable, true);
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
 let disposables: vscode.Disposable[] = [];
 
 export function activate(context: vscode.ExtensionContext) {
+	context.subscriptions.push(
+		vscode.commands.registerCommand('check-box-switcher.toggle check box', () => {
+			const editor = vscode.window.activeTextEditor;
+			if (!editor) { return; }
 
-	const disposable = vscode.commands.registerCommand('check-box-switcher.toggle check box', () => {
-		const editor = vscode.window.activeTextEditor;
-		if (!editor) { return; }
+			exec(
+				editor,
+				Enumerable.from(editor.selections).Select(selection => selection.active.line)
+			);
+		})
+	);
 
-		exec(
-			editor,
-			Enumerable.from(editor.selections).Select(selection => selection.active.line)
-		);
-	});
+	context.subscriptions.push(
+		vscode.commands.registerCommand('check-box-switcher.enable auto maintenance', () => {
+			setEnabelAutoMaintenance(true);
+		}));
 
-	context.subscriptions.push(disposable);
+	context.subscriptions.push(
+		vscode.commands.registerCommand('check-box-switcher.disable auto maintenance', () => {
+			setEnabelAutoMaintenance(false);
+		}));
+
+	disposer = vscode.workspace.onDidChangeTextDocument(onDidChangeTextDocument);
+}
+
+let disposer: vscode.Disposable;
+export function deactivate() {
+	disposer?.dispose();
 }
