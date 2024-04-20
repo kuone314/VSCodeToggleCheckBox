@@ -352,6 +352,7 @@ function onDidChangeTextDocument(event: vscode.TextDocumentChangeEvent) {
 
 	if (isEqual(newCheckBoxStatus, orgCheckBoxStatus)) { return; }
 
+	vscode.window.showInformationMessage('Check Box Switcher: Auto Maintenance Execed');
 	editor.edit(
 		editBuilder => {
 			applyCheckBoxStatus(editBuilder, document, Enumerable.from(newCheckBoxStatus));
