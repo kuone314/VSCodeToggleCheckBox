@@ -4,7 +4,7 @@
 
 # Switch Markdown Check Box
 
-![Sample](Code/Doc/Demonstration.gif)
+![Sample](Doc/Demonstration.gif)
 
 * Toggle check box on/off.  
   チェックボックスの切り替えを行います。
