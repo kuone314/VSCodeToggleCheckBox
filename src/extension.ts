@@ -283,12 +283,77 @@ function exec(editor: vscode.TextEditor, lineNoAry: Enumerable.Enumerable<number
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
+function getAllLines(document: vscode.TextDocument): number[] {
+	let result = [];
+	for (let idx = 0; idx < document.lineCount; idx++) {
+		result.push(idx);
+	}
+	return result;
+}
+
+function isEqual(
+	map1: Map<number, CheckType>,
+	map2: Map<number, CheckType>
+) {
+	if (map1.size !== map2.size) { return false; }
+	for (let [key, value] of map1) {
+		if (!map2.has(key) || map2.get(key) !== value) { return false; }
+	}
+	return true;
+}
+
 function onDidChangeTextDocument(event: vscode.TextDocumentChangeEvent) {
 	if (event.contentChanges.length === 0) { return; }
 	if (
 		event.reason === vscode.TextDocumentChangeReason.Undo ||
 		event.reason === vscode.TextDocumentChangeReason.Redo
 	) { return; }
+
+	const editor = vscode.window.activeTextEditor;
+	if (!editor) { return; }
+	const document = editor.document;
+	const tabSize = (typeof editor.options.tabSize === "number")
+		? editor.options.tabSize
+		: 2;
+
+	const groupAry = groupingLineNoAry(document, Enumerable.from(getAllLines(document)));
+	if (groupAry.length === 0) { return; }
+
+
+	const orgCheckBoxStatus = getCheckBoxStatus(document, [0, document.lineCount - 1]);
+	var newCheckBoxStatus = new Map(orgCheckBoxStatus);
+	for (const group of groupAry) {
+		function isLeaf(lineNo: number): unknown {
+			const childCheckBoxList = getChildCheckBox(document, tabSize, group.cluster, lineNo);
+			return (childCheckBoxList.length === 0);
+		}
+
+		const leafLineNoList = group.lines.filter(isLeaf);
+		for (const lineNo of leafLineNoList) {
+			const orgCheckType = getCheckType(document.lineAt(lineNo).text);
+			if (!orgCheckType) { continue; }
+
+			const newCheckType = (orgCheckType === CHECK_TYPE.on) ? CHECK_TYPE.on : CHECK_TYPE.off;
+			newCheckBoxStatus.set(lineNo, newCheckType);
+
+			let parentCheckBoxLineNoAry = getParentCheckBox(document, tabSize, group.cluster, lineNo);
+			parentCheckBoxLineNoAry.sort();
+			parentCheckBoxLineNoAry.reverse();
+			for (const parentCheckBoxLineNo of parentCheckBoxLineNoAry) {
+				const newCheckType = detectChackStateFromChild(document, tabSize, group.cluster, newCheckBoxStatus, parentCheckBoxLineNo);
+				newCheckBoxStatus.set(parentCheckBoxLineNo, newCheckType);
+			}
+		}
+	}
+
+	if (isEqual(newCheckBoxStatus, orgCheckBoxStatus)) { return; }
+
+	editor.edit(
+		editBuilder => {
+			applyCheckBoxStatus(editBuilder, document, Enumerable.from(newCheckBoxStatus));
+		},
+		{ undoStopAfter: false, undoStopBefore: false }
+	);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
