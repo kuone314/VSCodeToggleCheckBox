@@ -4,13 +4,22 @@
 
 # Switch Markdown Check Box
 
-![Sample](Code/Doc/Demonstration.gif)
+## About
 
-* Toggle check box on/off.  
+![Sample](Doc/Demonstration.gif)
+
+- Toggle check box on/off.  
   チェックボックスの切り替えを行います。
 
-* Supporting nested check box, as OrgMode.  
+- Supporting nested check box, as OrgMode.  
   OrgMode の様に、入れ子のチェックボックスに対応しています。
+
+## Commands
+
+ - `Toggle Check Box`
+ - `Check Box Switcher:Enable Auto Maintenance`
+ - `Check Box Switcher:Disable Auto Maintenance`
+
 
 # Link
 
